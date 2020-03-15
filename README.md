@@ -2,7 +2,7 @@
 
 Here is a few words about my application in order to get it easier for the user to understand how it works.
 
-#Tech Stack
+# Tech Stack
 
 - Java 8 (or higher)
 - Spring Boot
