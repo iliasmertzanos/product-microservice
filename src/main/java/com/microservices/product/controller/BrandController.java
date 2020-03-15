@@ -17,7 +17,7 @@ import com.microservices.product.service.BrandService;
 
 /**
  * A Brand Controller with a single end point giving back a Map with all Products grouped by Brands.<br>
- * The class com.epages.interview.controller.mapping.ModelMapper is being used to customly map Brand beans to BrandDTOs. 
+ * The class controller.mapping.ModelMapper is being used to customly map Brand beans to BrandDTOs. 
  */
 @RestController
 @RequestMapping("v1/search")
