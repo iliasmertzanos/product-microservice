@@ -6,8 +6,5 @@ import com.microservices.product.entity.Brand;
 
 public interface BrandService {
 
-	List<Brand> getAllBrands();
-	
-	
-	
+	List<Brand> getAllBrands();	
 }

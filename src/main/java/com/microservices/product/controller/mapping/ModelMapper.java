@@ -13,7 +13,6 @@ public class ModelMapper {
 		BrandDTO myBrandDTO=new BrandDTO();
 		
 		org.modelmapper.ModelMapper myStandardMapper=new org.modelmapper.ModelMapper();
-//		myMapper.
 		
 		List<ProductDTO> myProductsList=myBrand.getProductList()
 				.stream()

@@ -14,6 +14,7 @@ import org.apache.juli.logging.LogFactory;
 
 import com.google.common.collect.Comparators;
 import com.microservices.product.ProductApplication;
+import com.microservices.product.datatranferobject.ProductDTO;
 import com.microservices.product.datatranferobject.ProductDTOTest;
 
 import org.junit.BeforeClass;
@@ -22,6 +23,8 @@ import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -73,34 +76,40 @@ public class ControllerLayerTester {
 	@Test
 	public void testBrandListIsOrdered() {
 		
-		TreeMap<String, List<LinkedHashMap>> productList=restTemplate.getForObject("http://localhost:"+port+"/v1/search/get/products/",TreeMap.class);
+		ResponseEntity<TreeMap<String, List<ProductDTO>>> productListResponse=restTemplate.exchange(
+			    "http://localhost:"+port+"/v1/search/get/products/",
+			    HttpMethod.GET,
+			    new HttpEntity<>(null, headers),
+			    new ParameterizedTypeReference<TreeMap<String, List<ProductDTO>>>() {}
+			);
+		
+		TreeMap<String, List<ProductDTO>> productList=productListResponse.getBody();
 		
 		//Check if brands are sorted by name
 		assertTrue(Comparators.<String>isInOrder( new ArrayList<String>(productList.keySet()), Comparator.<String>naturalOrder()));
 		
-		for (List<LinkedHashMap> myProductList:productList.values()) {
+		for (List<ProductDTO> myProductList:productList.values()) {
 			
-			//Check if property brand is omitted  on products
-			myProductList.forEach(product->assertTrue(!product.containsKey("brand")));
+//			//Check if property brand is omitted  on products
+//			myProductList.forEach(product->assertTrue(!product.containsKey("brand")));
 			
 			//Check if Products are sorted by price 
-			assertTrue(Comparators.<LinkedHashMap>isInOrder( myProductList, new Comparator<LinkedHashMap>() {				
+			assertTrue(Comparators.<ProductDTO>isInOrder( myProductList, new Comparator<ProductDTO>() {				
 				//
 				@Override
-				public int compare(LinkedHashMap o1, LinkedHashMap o2) {
-					return ((Double)o1.get("price")).compareTo(((Double)o2.get("price")));
+				public int compare(ProductDTO o1, ProductDTO o2) {
+					return o1.getPrice().compareTo(o2.getPrice());
 				}
 				
 			}));
 			
 			//Check if Products have the property event in case property onSale is true
-			for(LinkedHashMap product:myProductList){
-				assertTrue(!product.containsKey("brand"));
-				ResponseEntity<ProductDTOTest> myProduct=restTemplate.getForEntity("http://localhost:"+port+"/v2/search/get/product/"+product.get("id")+"/",ProductDTOTest.class);
+			for(ProductDTO product:myProductList){
+				ResponseEntity<ProductDTOTest> myProduct=restTemplate.getForEntity("http://localhost:"+port+"/v2/search/get/product/"+product.getId()+"/",ProductDTOTest.class);
 				if(myProduct.getBody().getOnSale()) {
-					assertTrue(product.containsKey("event") && "ON SALE".equals(product.get("event")));
+					assertTrue("ON SALE".equals(product.getEvent()));
 				}else {
-					assertTrue(!product.containsKey("event"));
+					assertTrue(product.getEvent()==null);
 				}			
 			}			
 		}
